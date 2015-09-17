@@ -1,0 +1,9 @@
+C:\Malexs\projects\7 sem\SAiMM\1\SAiMM\SAiMM\bin\Debug\SAiMM.exe.config
+C:\Malexs\projects\7 sem\SAiMM\1\SAiMM\SAiMM\bin\Debug\SAiMM.exe
+C:\Malexs\projects\7 sem\SAiMM\1\SAiMM\SAiMM\bin\Debug\SAiMM.pdb
+C:\Malexs\projects\7 sem\SAiMM\1\SAiMM\SAiMM\obj\Debug\SAiMM.csprojResolveAssemblyReference.cache
+C:\Malexs\projects\7 sem\SAiMM\1\SAiMM\SAiMM\obj\Debug\SAiMM.Form1.resources
+C:\Malexs\projects\7 sem\SAiMM\1\SAiMM\SAiMM\obj\Debug\SAiMM.Properties.Resources.resources
+C:\Malexs\projects\7 sem\SAiMM\1\SAiMM\SAiMM\obj\Debug\SAiMM.csproj.GenerateResource.Cache
+C:\Malexs\projects\7 sem\SAiMM\1\SAiMM\SAiMM\obj\Debug\SAiMM.exe
+C:\Malexs\projects\7 sem\SAiMM\1\SAiMM\SAiMM\obj\Debug\SAiMM.pdb
