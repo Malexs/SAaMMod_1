@@ -8,112 +8,137 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
+using SAiMM.Generators;
+
 namespace SAiMM
 {
     public partial class Form1 : Form
     {
 
-        Double a = 32767,//32767,//3, 
+        Double a = 32767,
             r = 1,
-            m = 65537;//65537;//5;
+            m = 65537;
         List<Double> values = new List<Double>();
-        Double[] countOfContaining = new Double[21] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+        Int32[] countOfContaining;
+
+        Boolean isFirst = true;
 
         public Form1()
         {
             InitializeComponent();
+            comboBox1.Text = "Ламера";
         }
 
-        //Получу Rn, поделить на m
-        private Double GetNextR(Double curr)
+        //Return true is parameters were changed;
+        private Boolean CheckChanging(Double _a, Double _r, Double _m)
         {
-            return ((a * curr) % m);
-        }
-
-        private Double GetNextRand(Double rnd)
-        {
-            return rnd/m;
-        }
-
-        private void CheckContaining(Double element)
-        {
-            Int32 i = (int)(element / 0.05);
-            countOfContaining[i]++;
-        }
-
-        private Double GetMath(Int32 iter ,out Double disp, out Double kvad)
-        {
-            Double wait = 0;
-            Double summ = 0;
-  
-            foreach (Double db in values)
-            {
-                summ += db;
-            }
-            wait = Math.Round(summ / iter,4);
-
-            summ = 0;
-
-            foreach (Double db in values)
-            {
-                summ += Math.Pow(db-wait,2);
-            }
-            disp = Math.Round(summ / iter,4);
-
-            kvad = Math.Round(Math.Sqrt(disp),4);
-
-            return wait;
+            return !(a == _a && r == _r && m == _m);
         }
 
         private void button1_Click(object sender, EventArgs e)
         {
 
             chart1.Series[0].Points.Clear();
+            
 
-            a = Double.Parse(textBox1.Text);
-            r = Double.Parse(textBox2.Text);
-            m = Double.Parse(textBox3.Text);
-
-            Double currFloat = r;
             Int32 iter = 0;
-            Double rnd = 0;
-
             Double dispertion = 0;
             Double avKvadr = 0;
             Double matWait = 0;
+            Lahmer lahmer = Lahmer.Instance;
 
-            currFloat = GetNextR(currFloat);
-            rnd = GetNextRand(currFloat);
-
-            while (!values.Contains(rnd))
+            if (!CheckChanging(Double.Parse(textBox1.Text), Double.Parse(textBox2.Text), Double.Parse(textBox3.Text)))
             {
-                CheckContaining(rnd);
-                iter++;
-                values.Add(rnd);
-                currFloat = GetNextR(currFloat);
-                rnd = GetNextRand(currFloat);
+                if (isFirst)
+                {
+                    values = lahmer.getListOfDoubles(a,r,m);
+                    isFirst = false;
+                }
+                else
+                    values = lahmer.getListOfDoubles();
+                Console.WriteLine("as");
+            }
+            else
+            {
+                a = Double.Parse(textBox1.Text);
+                r = Double.Parse(textBox2.Text);
+                m = Double.Parse(textBox3.Text);
+                values = lahmer.getListOfDoubles(a, r, m);
             }
 
-            for (int i = 0; i < countOfContaining.Length - 1; i++)
+            switch (comboBox1.Text)
             {
-                Double f = countOfContaining[i] / iter;
-                chart1.Series[0].Points.AddY(f);
+                case "Ламера":
+                    break;
+                case "Равномерное":
+                    if (tmpFirstTBox.Text != "" && tmpSecTBox.Text != "")
+                    {
+                        Double a = Double.Parse(tmpFirstTBox.Text),
+                            b = Double.Parse(tmpSecTBox.Text);
+                        values = new Ravnomernoe(values, a, b).GetNewList();
+                    }
+                    break;
             }
 
-            //periodLabel.Text = iter.ToString();
+            Statistics stat = new Statistics(values);
 
-            matWait = GetMath(iter,out dispertion,out avKvadr);
+            float[] distr = stat.GetDistr();
+            for (int i = 0; i <= 19; i++)
+            {
+                chart1.Series[0].Points.AddXY(Math.Round(stat._beg + stat.interval * (i + 1), 3), distr[i]);
+            }
 
-            label4.Text = "Period: " + iter.ToString() + "\n" +
-                            "Dispertion: " + dispertion + "\n" +
-                            "Math Expecting: " + matWait + "\n" +
-                            "Average: " + avKvadr + ";";
+            label4.Text = "Expectation: " + stat.GetExpectation().ToString() + "\n" +
+                          "Dispertion: " + stat.GetDispersion().ToString() + "\n" +
+                          "Deviation: " + stat.GetMeanSquareDeviation().ToString();
 
-            Console.WriteLine(matWait +"  "+ dispertion+" "+ avKvadr+";");
-            //for (Int32 i = 0; i < countOfContaining.Length; i++)
-            //{
-            //    Console.WriteLine(parts[i] + ": " + countOfContaining[i]);
-            //}
+            Console.WriteLine(matWait + "  " + dispertion + " " + avKvadr + ";");
+        }
+
+        private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            switch (comboBox1.Text)
+            {
+                case "Ламера":
+                    tmpFirstLabel.Visible = false;
+                    tmpSecLabel.Visible = false;
+                    tmpFirstTBox.Visible = false;
+                    tmpSecTBox.Visible = false;
+                    break;
+                case "Гауссовское":
+                    tmpFirstLabel.Visible = true;
+                    tmpFirstLabel.Text = "m";
+                    tmpSecLabel.Visible = true;
+                    tmpSecLabel.Text = "σ";
+                    tmpFirstTBox.Visible = true;
+                    tmpSecTBox.Visible = true;
+                    break;
+                case "Экспоненциальное":
+                    tmpFirstLabel.Visible = true;
+                    tmpFirstLabel.Text = "λ";
+                    tmpSecLabel.Visible = false;
+                    tmpFirstTBox.Visible = true;
+                    tmpSecTBox.Visible = false;
+                    break;
+                case "Гамма":
+                    tmpFirstLabel.Visible = true;
+                    tmpFirstLabel.Text = "λ";
+                    tmpSecLabel.Visible = true;
+                    tmpSecLabel.Text = "η";
+                    tmpFirstTBox.Visible = true;
+                    tmpSecTBox.Visible = true;
+                    break;
+                case "Равномерное":
+                case "Треугольное":
+                case "Симпсона":
+                    tmpFirstLabel.Visible = true;
+                    tmpFirstLabel.Text = "a";
+                    tmpSecLabel.Visible = true;
+                    tmpSecLabel.Text = "b";
+                    tmpFirstTBox.Visible = true;
+                    tmpSecTBox.Visible = true;
+                    break;
+            }
         }
     }
 }
